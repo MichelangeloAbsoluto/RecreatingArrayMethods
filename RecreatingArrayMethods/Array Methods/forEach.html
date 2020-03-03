@@ -1,0 +1,55 @@
+<script src="../tinytest.js"></script>
+
+<script>
+
+function forEach(array, callback, configureableThisObject){
+	var callbackFunction = callback;
+
+	if (configureableThisObject) {
+		callbackFunction = callback.bind(configureableThisObject);
+	}
+
+	for (var i = 0; i < array.length; i++) {
+		callbackFunction(array[i], i, array);
+	}
+}
+;
+
+tests({
+
+  'It should run the callback function array.length times': function() {
+	var counter = 0;
+	forEach([1, 2, 3], function(){
+		counter++;
+	})
+	eq(counter, 3);
+  },
+
+  'It should pass in the i as the first argument to the callback function': function() {
+  	forEach([1], function(number){
+  		eq(1, number);
+  	})
+  },
+  'It should pass in the position of i as the second argument to the callback function': function(){
+  	forEach([1], function(number, index){
+  		eq(0, index);
+  	})
+  },
+
+  'It should pass in the original array as the third arguent to the callback function': function() {
+  	var testArray = [1, 2, 3];
+  	forEach(testArray, function(number, index, array) {
+  		eq(testArray, array);
+  	})
+  },
+  'It should accept a Configurable This Object as a third parameter' : function(){
+  	var configureableThisObject = {
+  		name: 'zion',
+  		birthplace: 'georgia'
+  	};
+  	forEach([1, 2, 3], function(){
+  		eq(this.name, 'zion'); 
+  	}, configureableThisObject)
+  }
+});
+</script>

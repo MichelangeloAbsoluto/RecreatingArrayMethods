@@ -1,0 +1,191 @@
+<script src="../simpletest.js"></script>
+
+<script>
+
+/*
+Function Description:
+	copyWithin() copies part of given array to another location in the given array without modifying its length. It returns the modified array. 
+
+Prototype Implementation:
+	copyWithin(array, target, start, end) {
+			for (var i = target, var j = 0; i < end - start; i++, j++) {
+				array [i] = array[start + j];
+			}
+			return array;
+		}
+
+Function Signature: 
+	copyWithin(array, targetIndex, copyStart, copyEnd)
+	return array
+
+Requirements:
+
+Function Behavior & Return Values:
+	1. It should return a modified array, not a new array.
+	2. The length of the modified array should be the same as the length of the original array.
+	3. It should actually copy the values.
+
+Target Index Specifications: 
+	4. It should start modifying values at targetIndex.
+	5. If target index is negative, target index will be used as an off-set value counted from end.
+	6. If target index is larger than array.length, nothing will be copied.
+	7. If the range between the targetIndex and the final index is less than the copied seqeunce, the copied sequence will be trimmed to fit. No new indexes will be added.
+
+Copy Start Index Specifications:
+	8. If a copyStart index is provided, the copied sequence should begin at that index.
+	9. If a copyStart index is provided that is negative, it should be used as an off-set value.
+	10. If NO copyStart index is provided, the copied sequence should start at index 0.
+
+Copy End Index Specifications:
+	11. If a copyEnd index is provided, the copied sequence should end right before that index (not including it).
+	12. If a copyEnd index is provided that is negative, it should be used as an off-set value.
+	13. If copyEnd index is NOT provided, the copied sequence should copy until the last index (including it).
+
+*/
+
+
+function copyWithin(array, targetIndex, copyStart, copyEnd){
+	
+	// VARIABLES:
+	// Length of original array as a fixed variable.
+	// Index of original array to start modifying at.
+	// Storage for the values we want to copy.
+	// Where in the array to start copying from.
+	// Where in the array to stop copying from.
+	var arrayLength = array.length;
+	var indexToTarget = 0;
+	var copiedSequence = [];
+	var sequenceStart = 0; 
+	var sequenceEnd = arrayLength; 
+
+	// If targetIndex is positive, use it. If it's negative, use it as an off-set. 
+	if (targetIndex > 0) {
+		indexToTarget = targetIndex; 
+	} else if (targetIndex < 0) {
+		indexToTarget = arrayLength + targetIndex; 
+	}
+
+	// If copyStart is positive, use it. If it's negative, use it as an off-set. 
+	if (copyStart > 0) {
+		sequenceStart = copyStart;
+	} else if (copyStart < 0) {
+		sequenceStart = arrayLength + copyStart;
+	}
+
+	// If copyEnd is positive, use it. If it's negative use it as an off-set value. 
+	if (copyEnd > 0) {
+		sequenceEnd = copyEnd; 
+	} else if (copyEnd < 0) {
+		sequenceEnd = arrayLength + copyEnd;
+	}
+
+	// Create an array of the sequence we want to copy. 
+	for (var i = sequenceStart; i < sequenceEnd; i++) {
+		copiedSequence.push(array[i]);
+	}
+
+	// Copy the sequence into the original array.
+	for (var i = 0; i < copiedSequence.length && indexToTarget + i < arrayLength; i++) {
+		array[indexToTarget + i] = copiedSequence[i];
+	}
+
+	return array; 
+} 
+
+tests({
+	'1. It should return a modified array, not a new array.': function(){
+		var array = [1, 2, 3];
+		var resultArray = copyWithin(array);
+		eq(resultArray, array); 
+	},
+	'2. The length of the returned array should be the same as the length of the original array.': function(){
+		var array = [1, 2, 3, 4, 5];
+		var originalLength = array.length;
+		var resultArray = copyWithin(array);
+		eq(resultArray.length, originalLength);
+	},
+	'3. It should actually copy the values.': function(){
+		var array = [99, 99, 99, 100, 100, 100, 101, 101, 101]
+		copyWithin(array, 5);
+		eq(array[5], 99);
+	},
+	'4. It should start modifying values at targetIndex.': function(){
+		var array = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+		copyWithin(array, 5);
+		eq(array[5], 0);
+		eq(array[0], 0);
+		eq(array[4], 4);
+		eq(array[6], 1);
+	},
+	'5. If target index is negative, target index will be used as an off-set value counted from end.': function(){
+		var array = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+		copyWithin(array, -2);
+		eq(array[0], 0);
+		eq(array[2], 2);
+		eq(array[8], 8);
+		eq(array[9], 0);
+		eq(array[10], 1);
+	},
+	'6. If target index is larger than array.length, nothing will be copied.': function(){
+		var array = [0, 1, 2, 3, 4, 5];
+		copyWithin(array, 10);
+		eq(array[0], 0);
+		eq(array[1], 1);
+		eq(array[2], 2);
+		eq(array[3], 3);
+		eq(array[4], 4);
+		eq(array[5], 5);
+
+	},
+	'7. If the length of the copied range is larger than the range between the targetIndex and the final index of the array, the copied sequence will be trimmed to fit. No new indexes will be added.': function(){
+		var array = [0, 1, 2, 3];
+		copyWithin(array, 2);	
+		eq(array[2], 0);
+		eq(array[3], 1);
+		eq(array.length, 4);	
+	},
+	'8. If a copyStart index is provided, the copied sequence should begin at that index.': function(){
+		var array = [0, 1, 2, 3, 4, 5]
+		copyWithin(array, 0, 3);
+		eq(array[0], 3);
+		eq(array[1], 4);
+		eq(array[2], 5);
+	},
+	'9. If a copyStart index is provided that is negative, it should be used as an off-set value.': function(){
+		var array = [0, 1, 2, 3, 4, 5];
+		copyWithin(array, 0, -2);
+		eq(array[0], 4);
+		eq(array[1], 5);
+	},
+	'10. If NO copyStart index is provided, the copied sequence should start at index 0.': function(){
+		var array = [0, 1, 2, 3, 4, 5];
+		copyWithin(array, 4);
+		eq(array[4], 0);
+		eq(array[5], 1);
+	},
+	'11. If a copyEnd index is provided, the copied sequence should end right before that index (not including it).': function(){
+		var array = [0, 1, 2, 3, 4, 5, 6, 7];
+		copyWithin(array, 0 , 3, 5);
+		eq(array[0], 3);
+		eq(array[1], 4);
+		eq(array[2], 2);
+	},
+	'12. If a copyEnd index is provided that is negative, it should be used as an off-set value.': function(){
+		var array = [0, 1, 2, 3, 4, 5, 6, 7];
+		copyWithin(array, 0 , 3, -2);
+		eq(array[0], 3);
+		eq(array[1], 4);
+		eq(array[2], 5);
+	},
+	'13. If NO copyEnd index is provided, the copied sequence should copy until the last index (including it).': function(){
+		var array = [0, 1, 2, 3, 4, 5, 6];
+		copyWithin(array, 0, 4);
+		eq(array[0], 4);
+		eq(array[1], 5);
+		eq(array[2], 6);
+		eq(array[3], 3);
+	}
+});
+
+
+</script>

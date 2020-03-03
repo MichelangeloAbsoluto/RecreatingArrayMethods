@@ -1,0 +1,175 @@
+<script src="../simpletest.js"></script>
+
+<script>
+/*
+
+Function Description:
+findIndex() should return the index of the first value that satisfies its callback function. If no value satisfies its callback, it shouldr return -1.
+
+Prototype Implementation:
+	function find(array, callbackFunction, optionalThisObject) {
+		for (var i = 0; i < array.length; i++) {
+			if (callbackFunction(array[i], i, array) === true) {
+				return i;
+			}
+		}
+		return -1;	
+	}
+
+Function Signature: 
+	findIndex(array, callback, optionalThisObject)
+
+Callback Parameters: 
+	currentValue 
+	currentIndex (OPTIONAL)
+	arrayItIsSearching (OPTIONAL)
+	optionalThisObject (OPTIONAL)
+
+Requirements:
+
+1. It should pass in the ith element as the first argument to the callback.
+2. It should pass in the ith index as the second argument to the callback.
+3. It should pass in the array being searched as the third argument to the callback.
+4. It should accept an optionalThisObject as its third argument. 
+
+5. It should return the index of the first element in the array where the callback returns true.
+6. Callback should stop running once it has found an element that returns true.
+7. It should return -1 if the calback does NOT return true for any element in the array. 
+
+8. The callback should visit holes in the array.
+9. The callback should visit elements that are deleted in the array.
+10. If the value of an element in the array is changed, the callback should visit the new value.  
+11. The callback should NOT visit elements that are appended to the array.
+
+12. It should NOT mutate the array before being passed the array into the callback.
+
+*/
+
+function findIndex(array, callback, optionalThisObject){
+	// VARIABLES: 
+	// Default return value, for-loop fixed length, callback function.  
+	var indexToReturn = -1;
+	var arrayOriginalLength = array.length;
+	var callbackFunction = callback;
+	
+	// If a 'THIS' object was provided, bind it to the callback
+	if (optionalThisObject) {
+		callbackFunction = callback.bind(optionalThisObject);
+	}
+
+	// Loop through array looking for element that satisfies the callback.
+	for (var i = 0; i < arrayOriginalLength; i++) {
+		var elementReturnsTrue = callbackFunction(array[i], i, array);
+		if (elementReturnsTrue) {
+			indexToReturn = i;
+			return indexToReturn;
+		}
+	}
+
+	// If we reach here, no element satisfied the callback. Return the default -1. 
+	return indexToReturn
+};
+
+tests({
+	'1. It should pass in the ith element as the first argument to the callback.':function(){
+		var testArray = [5];
+		findIndex(testArray, function(currentValue){
+			eq(currentValue, 5);	
+		})
+	},
+	'2. It should pass in the ith index as the second argument to the callback..':function(){
+		var testArray = [5];
+		findIndex(testArray, function(currentValue, currentIndex){
+			eq(currentIndex, 0);	
+		})
+	},
+	'3. It should pass in the array being searched as the third argument to the callback..':function(){
+		var testArray = [5, 42, 33, 97, 7];
+		findIndex(testArray, function(currentValue, currentIndex, array){
+			for (var i = 0; i < testArray.length; i++) {
+				eq(testArray[i], array[i]);
+			}	
+		})
+	},
+	'4. It should accept an optionalThisObject.':function(){
+		var testArray = [5, 10, -5];
+		var optionalThisObject = {
+			name: 'skywalker',
+			age: 27
+		}
+		findIndex(testArray, function(){
+			eq(this.name, 'skywalker');
+		}, optionalThisObject)
+	},
+
+
+
+	'5. It should return the index of the first element in the array where the callback returns true..':function(){
+		var testArray = [5, 10, 33, 2, 70];
+		var findResult = findIndex(testArray, function(currentValue){
+			return currentValue > 30;
+		})
+		eq(findResult, 2);
+	},
+	'6. Callback should stop running once it has found an element that returns true.':function(){
+		var testArray = [5, 10, 33, 2, 70];
+		var timesCallbackHasRun = 0;
+		findIndex(testArray, function(currentValue){
+			timesCallbackHasRun++;
+			return currentValue > 30;
+		})
+		eq(timesCallbackHasRun, 3);
+	},
+	'7. It should return -1 if the calback does NOT return true for any element in the array.':function(){
+		var testArray = [5, 10, 33, 2, 70];
+		var findResult = findIndex(testArray, function(currentValue){
+			return currentValue > 300;
+		})
+		eq(findResult, -1);
+	},
+	'8. The callback should visit holes in the array.':function(){
+		var testArray = [,,,3,5,7,,12,9];
+		var timesCallbackHasRun = 0;
+		findIndex(testArray, function(){
+			timesCallbackHasRun++;
+		})
+		eq(testArray.length, timesCallbackHasRun);
+	},
+	'9. The callback should visit elements that are deleted in the array.':function(){
+		var testArray = [10, 20, 30, 40, 60];
+		var timesCallbackHasRun = 0;
+		findIndex(testArray, function(currentValue, currentIndex, array){
+			array.pop();
+			timesCallbackHasRun++;
+		})
+		eq(5, timesCallbackHasRun);
+	},
+	'10. If the value of an element in the array is changed, the callback should visit the new value of the element. ':function(){
+		var testArray = [10, 20, 30, 40, 60];
+		var result = findIndex(testArray, function(currentValue, currentIndex, array){
+			array[3] = 7;
+			return currentValue === 7;
+		})
+		eq(result, 3);
+	},
+	'11. The callback should NOT visit elements that are appended to the array.':function(){
+		var testArray = [10, 20, 7];
+		var timesCallbackHasRun = 0;
+		findIndex(testArray, function(currentValue, currentIndex, array){
+			array.push(5);
+			timesCallbackHasRun++;
+		})
+		eq(timesCallbackHasRun, 3);
+	},
+	'12. The array should NOT be mutated before being passed into the callback': function(){
+		var testArray = [5, 90, 150, 200];
+		find(testArray, function(currentElement, currentIndex, array){
+			eq(array, testArray);
+		})
+	}
+
+
+});
+
+
+</script>

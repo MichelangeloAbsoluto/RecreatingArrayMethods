@@ -1,0 +1,176 @@
+<script src="../simpletest.js"></script>
+
+<script>
+
+/*
+Function Description:
+	Some() tests whether AT LEAST ONE element in an array returns true for the callback function. It returns TRUE if one element passes, and FALSE if no elements pass. 
+
+Prototype Implementation:
+	function some(array, callbackFunction, optionalThisObject) {
+		for (var i = 0; i < array.length; i++) {
+			if (callbackFunction(array[i], i, array) === true) {
+				return true;
+			}
+		}
+		return false;	
+	}
+
+Function Signature: 
+	some(array, callback[, optionalThisObject])
+
+Callback Parameters: 
+	currentElement
+	currentIndex (OPTIONAL)
+	array (OPTIONAL)
+	optionalThisObject (OPTIONAL)
+	Returns a truthy value
+
+Requirements:
+
+1. It should pass in the ith element as the first argument to the callback.
+2. It should pass in the ith index as the second argument to the callback.
+3. It should pass in the array being traversed as the third argument to the callback.
+4. It should accept an optional THIS object.
+
+5. It should return true as soon as one element in the array returns true for the callback.
+6. It should return false if every element in the array returns false for the callback.
+7. It should return false for an empty array.
+
+8. The callback should stop running as soon as one element in the array returns true.
+
+9. Callback should NOT visit holes.
+10. Callback shout NOT visit deleted indexes. 
+11. Callback should NOT visit indexes appended to the array.
+12. If an index is assigned a new value before Callback visits that index, it should visit the new value.  
+
+13. It should not mutate the array passed in as its parameter. 
+
+*/
+
+function some(array, callback, optionalThisObject){
+	// Fixed array.length variable for for-loop
+	var arrayOriginalLength = array.length;
+
+	// If 'this' object is provided, bind it to the callback. 
+	if (optionalThisObject) {
+		callback = callback.bind(optionalThisObject);
+	}
+
+	// Loop thru array, return true if callback(element) returns true
+	for (var i = 0; i < arrayOriginalLength; i++){
+		// Check if i exists to avoid holes. 
+		if (i in array) {
+			if (callback(array[i], i, array) === true){
+			return true;
+			}
+		}
+	}
+
+	// If we reach here, no element returned true. So we return false. 
+	return false;
+};
+
+tests({
+	'1. The first argument passed into the callback should be the current element value.':function(){
+		var testArray = [5];
+		some(testArray, function(currentElementValue){
+			eq(currentElementValue, 5);
+		})
+	},
+	'2. The second argument passed into the callback should be the current index.':function(){
+		var testArray = [5];
+		some(testArray, function(currentElementValue, currentElementIndex){
+			eq(currentElementIndex, 0);
+		})
+	},
+	'3. The third argument passed into the callback should be the array.':function(){
+		var testArray = [5, 12, 77];
+		some(testArray, function(currentElementValue, currentElementIndex, array){
+			eq(testArray, array);
+		})
+	},
+	'4. It should accept an optional THIS object as its third parameter.':function(){
+		var testArray = [2, 44, -6];
+		var optionalThisObject = {
+			name: 'bagley'
+		}
+		some(testArray, function(){
+			eq(this.name, 'bagley');
+		}, optionalThisObject)
+	},
+
+	
+	'5. It should return true as soon as one element in the array returns true for the callback.':function(){
+		var testArray = [5, 10, 20, 500];
+		var someResult = some(testArray, function(currentElement){
+			return currentElement === 20;
+		})
+		eq(someResult, true);
+	},
+	'6. It should return false if every element in the array returns false for the callback.':function(){
+		var testArray = [5, 10, 20, 500];
+		var someResult = some(testArray, function(currentElement){
+			return currentElement > 600;
+		})
+		eq(someResult, false);
+	},
+	'7. It should return false for an empty array.': function(){
+		var testArray = [];
+		var someResult = some(testArray, function(){});
+		eq(someResult, false);
+	},
+	'8. The callback should stop running as soon as one element in the array returns true.': function(){
+		var testArray = [10, 50, 77, 9, 10];
+		var timesCallbackHasRun = 0;
+		some(testArray, function(currentElement, currentIndex, array){
+			timesCallbackHasRun++;
+			return currentElement > 12;
+		})
+		eq(timesCallbackHasRun, 2);
+	},
+	'9. Callback should NOT visit holes.':function(){
+		var testArray = [,,,,5,,,9,,10,11,,,,3];
+		var timesCallbackHasRun = 0;
+		some(testArray, function(){
+			timesCallbackHasRun++;
+		})
+		eq(timesCallbackHasRun, Object.keys(testArray).length);
+	},
+	'10. Callback should NOT visit deleted indexes.':function(){
+		var testArray = [5, 15, 35, 75, 6];
+		var timesCallbackHasRun = 0; 
+		some(testArray, function(currentElement, currentIndex, array){
+			timesCallbackHasRun++;
+			delete array[4];
+		})
+		eq(timesCallbackHasRun, 4);
+	},
+	'11. Callback should NOT visit indexes appended to the array.':function(){
+		var testArray = [5, 15, 35, 75, 6];
+		var timesCallbackHasRun = 0; 
+		some(testArray, function(currentElement, currentIndex, array){
+			timesCallbackHasRun++;
+			array.push(44);
+		})
+		eq(timesCallbackHasRun, 5);
+	},
+	'12. If an index is assigned a new value before Callback visits that index, the Callback  should visit the new value.':function(){
+		var testArray = [5, 15, 35, 75, 6];
+		var someResult = some(testArray, function(currentElement, currentIndex, array){
+			array[4] = 22;
+			return currentElement === 6;
+		})
+		eq(someResult, false);
+	},
+	'13. It should not mutate the array passed in as its parameter':function(){
+		var testArray = [5, 15, 30];
+		some(testArray, function(currentElementValue, currentElementIndex, testArray){
+		})
+		eq(testArray[0], 5);
+		eq(testArray[1], 15);
+	},
+});
+
+
+</script>

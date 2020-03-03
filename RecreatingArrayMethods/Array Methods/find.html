@@ -1,0 +1,165 @@
+<script src="../simpletest.js"></script>
+
+<script>
+
+/*
+Function Description:
+	find() returns the first value in a provided array that satisfies its callback function. 
+
+Prototype Implementation:
+	function find(array, callbackFunction, optionalThisObject) {
+			for (var i = 0; i < array.length; i++) {
+				if (callbackFunction(array[i], i, array) === true) {
+					return array[i];
+				}
+			}
+		return undefined;	
+	}
+
+Function Signature: 
+	find(array, callback[, optionalThisObject])
+
+Callback Parameters: 
+	currentElement
+	currentIndex (OPTIONAL)
+	array (OPTIONAL)
+
+Requirements:
+
+1. It should pass in the ith element as the first argument to the callback.
+2. It should pass in the ith index as the second argument to the callback.
+3. It should pass in the array being traversed as the third argument to the callback.
+4. It should accept an optional THIS object.
+
+5. It should return the first value in the array where the callback returns true.
+6. After it returns a value, the callback should stop visiting indexes.  
+7. It should return undefined if the callback does not return true for any element. 
+
+8. The callback should visit holes in the array. 
+9. If an univisted element in the array is changed, the callback should visit the element's new value. 
+10. The callback should visit elements deleted from the array.
+11. The callback should NOT visit elements appended to the end of the array. 
+
+12. It should NOT mutate the array before passing it into the callback.
+
+*/
+
+function find(array, callback, optionalThisObject){
+	var callbackFunction = callback;
+	var arrayOriginalLength = array.length;
+
+	if (optionalThisObject) {
+		callbackFunction = callback.bind(optionalThisObject);
+	}
+
+	for (var i = 0; i < arrayOriginalLength; i++){
+		var isElementTrue = callbackFunction(array[i], i, array);
+		if (isElementTrue) {
+			return array[i];
+		}
+	}
+	return undefined;
+
+};
+
+tests({
+	'1. It should pass in the current element as the first argument into the callback':function(){
+		var testArray = [5];
+		find(testArray, function(currentElement){
+			eq(currentElement, 5);
+		})
+	},
+	'2. It should pass in the current index as the second argument into the callback':function(){
+		var testArray = [5];
+		find(testArray, function(currentElement, currentIndex){
+			eq(currentIndex, 0);
+		})
+	},
+	'3. It should pass in the array as the third argument into the callback':function(){
+		var testArray = [5, 66, 3];
+		find(testArray, function(currentElement, currentIndex, array){
+			for (var i = 0; i < testArray.length; i++) {
+				eq(testArray[i], array[i]);
+			}
+		})
+	},
+	'4. It should accept an optionalThisObject as the fourth argument of the callback':function(){
+		var testArray = [5, 10, 15, 20];
+		var optionalThisObject = {
+			name: 'zion',
+			occupation: 'baller'
+		};
+		find(testArray, function(){
+			eq(this.name, 'zion');
+		}, optionalThisObject)
+	},
+
+	'5. It should return the first value in the array where the callback returns true.':function(){
+		var testArray = [5, 10, 15, 20];
+		var findResult = find(testArray, function(currentElement){
+			return currentElement > 9;
+		})
+		eq(findResult, 10);
+	},
+	'6. If the callback returns true for a value, it should stop running.':function(){
+		var testArray = [5, 90, 150, 200];
+		var timesCallbackHasRun = 0;
+		find(testArray, function(currentElement){
+			timesCallbackHasRun++;
+			return currentElement > 80;
+		})
+		eq(timesCallbackHasRun, 2);
+	},
+	'7. It should return undefined if the callback does not return true for any element.':function(){
+		var testArray = [5, 90, 150, 200];
+		var findResult = find(testArray, function(currentElement){
+			return currentElement > 300;
+		});
+		eq(findResult, undefined);
+	},
+
+	'8.Callback should visit holes in the array':function(){
+		var testArray = [5,, 90,,,,, 10, 150, 200];
+		var timesCallbackHasRun = 0;
+		find(testArray, function(currentElement){
+			timesCallbackHasRun++;
+			return currentElement > 500;
+		})
+		eq(timesCallbackHasRun, testArray.length)
+	},
+	'9. If an univisted element in the array is changed, the callback should visit the new value.': function(){
+		var testArray = [0, 1, 2, 4, 3];
+		var result = find(testArray, function(currentElement, currentIndex, array){
+			array[2] = 50;
+			return currentElement > 10;
+		})
+		eq(result, 50);
+	},
+	'10. Callback should visit values that were deleted in the callback':function(){
+		var testArray = [5, 10, 15, 20];
+		var timesCallbackHasRun = 0;
+		find(testArray, function(currentElement, currentIndex, array){
+			array.pop();
+			timesCallbackHasRun++
+		})
+		eq(timesCallbackHasRun, 4);
+	},
+	'11. Callback should NOT visit elements appended to array during callback function': function(){
+		var testArray = [5, 90, 150, 200];
+		var timesCallbackHasRun = 0;
+		find(testArray, function(currentElement, currentIndex, array){
+			array.push(4);
+			timesCallbackHasRun++;
+		})
+		eq(timesCallbackHasRun, 4);
+	},
+	'12. The array passed into find should not be mutated before being passed into the callback function':function(){
+		var testArray = [5, 90, 150, 200];
+		find(testArray, function(currentElement, currentIndex, array){
+			eq(array, testArray);
+		})
+	}
+});
+
+
+</script>

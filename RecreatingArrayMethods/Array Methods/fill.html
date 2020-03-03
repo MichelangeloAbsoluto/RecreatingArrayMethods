@@ -1,0 +1,153 @@
+<script src="../simpletest.js"></script>
+
+<script>
+
+/*
+Function Description:
+	fill() changes all values in given array to given value, from given start index until given end index (excluding). It returns the modified array. 
+
+Prototype Implementation:
+	fill(array, value, startIndex, endIndex) {
+
+			for (var i = startIndex; i < endIndex; i++) {
+				array[i] = value; 
+			}
+			return array; 
+	}
+
+Function Signature: 
+	fill(array, valueToAdd, [startIndex,] [endIndex])
+
+Requirements:
+
+Function Behavior: 
+1. It should change values in the array to ValueToAdd. 
+2. If valueToAdd is an object, it should fill the array with references to the object, not the object itself. 
+3. It should return the modified array, not a new array.
+4. It should return undefined if the array is empty. 
+
+Start Index Specifications:
+4. If no startIndex is provided, it should modify values starting at index 0. 
+5. If a startIndex is provided, it should modify values starting at startIndex. 
+6. If a startIndex is provided that is negative, it is used as an offset value (array.length + startIndex).
+
+End Index Specifications
+7. If no endIndex is provided, it should modify values up to and including the final index.
+8. If an endIndex is provided, it should moidify values to up but not including endIndex.
+9. If an endIndex is provided that is negative, it is used as an offset value (array.length + end).
+
+ */
+
+function fill(array, valueToAdd, startIndex, endIndex){
+
+	// Checks if array is empty.
+	if (array.length < 1) {
+		return undefined;
+	}
+
+	// VARIABLES:
+	// index to start filling values, index to stop filling values.
+	var fillStartPoint = 0; 
+	var fillEndPoint = array.length; 
+
+	// If startIndex is positive, use it. If it's negative, use it as an off-set value from end of array. 
+	if (startIndex > 0) {
+		fillStartPoint = startIndex;
+	} else if (startIndex < 0) {
+		fillStartPoint = array.length + startIndex; 
+	}
+
+	// If endIndex is positive, use it. If it's negative, use it as an off-set value from end of array. 
+	if (endIndex > 0) {
+		fillEndPoint = endIndex;
+	} else if (endIndex < 0) {
+		fillEndPoint = array.length + endIndex;
+	}
+
+	// Loop thru array, replace all values within the range.  
+	for (var i = fillStartPoint; i < fillEndPoint; i++) {
+		array[i] = valueToAdd;
+	}
+
+	// Return the modified array.
+	return array;
+} 
+
+tests({
+	'1. It should modify values in the array to ValueToAdd.': function(){
+		var array = [1, 1, 1, 1];
+		fill(array, 5);
+		eq(array[0], 5);
+		eq(array[3], 5);
+	},
+	'2. If valueToAdd is an object, it should fill the array with references to the object, not the object itself.': function(){
+		var array = [1, 2, 3];
+		fill(array, {
+			name: 'fox',
+			age: 22,
+			team: 'kings'
+		});
+		array[0].age = 30;
+		array[0].ppg = 19;
+		eq(array[1].age, 30);
+		eq(array[2].hasOwnProperty('ppg'), true); 
+	},
+	'3. It should return the modified array, not a new array.': function(){
+		var array = [1, 2, 3];
+		var result = fill(array, 55);
+		eq(result, array);
+	},
+	'4. If no startIndex is provided, it should modify values starting at index 0.': function(){
+		var array = [44, 43, 61];
+		fill(array, 3);
+		eq(array[0], 3);
+	},
+	'5. If a startIndex is provided, it should modify values starting at startIndex.': function(){
+		var array = [1, 2, 3, 5, 8, 13, 21];
+		fill(array, 100, 2);
+		eq(array[0], 1);
+		eq(array[1], 2);
+		eq(array[2], 100);
+		eq(array[6], 100);
+	},
+	'6. If a startIndex is provided that is negative, it is used as an offset value (array.length + startIndex).': function(){
+		var array = [0, 1, 2, 3, 'Jefferson', 5, 6, 'Anthony Burgess'];
+		fill(array, 100, -2);
+		eq(array[0], 0);
+		eq(array[1], 1);
+		eq(array[5], 5);
+		eq(array[6], 100);
+		eq(array[7], 100);
+	},
+	'7. If no endIndex is provided, it should modify values up to and including the final index.': function(){
+		var array = [0, 1, 2, 3, 4, 5];
+		fill(array, 99);
+		eq(array[4], 99);
+		eq(array[5], 99);
+	},
+	'8. If an endIndex is provided, it should modify values to up but not including endIndex.': function(){
+		var array = [0, 1, 2, 3, 4, 5];
+		fill(array, 99, 0, 4);
+		eq(array[2], 99);
+		eq(array[3], 99);
+		eq(array[4], 4);
+		eq(array[5], 5);
+
+	},
+	'9. If an endIndex is provided that is negative, it is used as an offset value (array.length + end).': function(){
+		var array = [0, 1, 2, 3, 4, 5];
+		fill(array, 99, 0, -2);
+		eq(array[0], 99);
+		eq(array[3], 99);
+		eq(array[4], 4);
+		eq(array[5], 5);
+	},
+	'10. If array is empty, it should return undefined.': function(){
+		var emptyArray = [];
+		var result = fill(emptyArray);
+		eq(result, undefined);
+	}
+});
+
+
+</script>

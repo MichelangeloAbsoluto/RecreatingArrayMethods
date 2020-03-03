@@ -1,0 +1,94 @@
+<script src="../simpletest.js"></script>
+
+<script>
+
+/*
+Function Description:
+	pop() removes the last element from a given array and returns that element. The given array is mutated.  
+
+Prototype Implementation:
+	pop(array) {
+		var poppedElement = array[array.length - 1];
+		delete array[array.length - 1];
+		return poppedElement; 
+	}
+
+Function Signature: 
+	pop(array)
+
+Requirements:
+	
+Function Behavior: 
+	1. It should remove the last element of the array.
+	2. It should decrease the length of the array by one.
+	3. It should remove holes as well as real values. 
+
+Return Values:
+	4. It should return the last element of the array. 
+	5. It should return undefined if the array is empty. 
+	6. It should throw a TypeError if the object given is not of type Array. 
+
+*/
+
+function pop(array){
+	
+	// Check provided argument is an array & is not empty.  
+	if (array instanceof Array === false) {
+		throw new TypeError('Object must be of type Array.');
+	}
+	if (array.length < 1) {
+		return undefined;
+	}
+
+	// Store last element in a variable to return.
+	var poppedElement = array[array.length - 1];
+	
+	// Remove last element and shorten length by 1.
+	delete array[array.length - 1];
+	array.length--;
+
+	// Return element that was removed. 
+	return poppedElement;
+} 
+
+tests({
+	'1. It should remove the last element of the array.': function(){
+		var array = [1, 5, 55];
+		pop(array);
+		eq(array[2], undefined);
+	},
+	'2. It should decrease the length of the array by one.': function(){
+		var array = [1, 5, 55];
+		pop(array);
+		eq(array.length, 2);
+	},
+	'3. It should remove holes as well as real values': function(){
+		var array = [1,,];
+		pop(array);
+		eq(array.length, 1);
+		eq(array[array.length - 1], 1);
+	},
+	'4. It should return the last element of the array.': function(){
+		var array = [1, 5, 55];
+		var result = pop(array);
+		eq(result, 55);
+	},
+	'5. It should return undefined if the array is empty.': function(){
+		var array = [];
+		var result = pop(array);
+		eq(result, undefined);
+	},
+	'6. It should throw a TypeError if the object provided is not an array.': function(){
+		var notAnArray = 'Alexander the Great';
+		var isTypeError = false;
+		try {
+			pop(notAnArray);
+		} catch (e) {
+			isTypeError = (e instanceof TypeError);
+		}
+		eq(isTypeError, true);
+	}
+});
+
+
+</script>

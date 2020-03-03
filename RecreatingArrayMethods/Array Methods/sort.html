@@ -1,0 +1,179 @@
+<script src="../simpletest.js"></script>
+
+<script>
+
+/*
+Function Description:
+	sort() sorts an array in ascending order as defined by a callback function and returns a sorted array. Default ordering is defined by converting each element into a string and comparing their UTF-16 code values. 
+
+Prototype Implementation:
+	*Too complicated
+
+Function Signature: 
+	sort(array, [callback])
+	return array;
+
+Requirements:
+
+Function Behavior: 
+	1. It should return a sorted array, not a new array. 
+	2. If no callback, it should sort elements in ascending order by each element's UTF-16 code after being converted into strings.
+	3. If no callback, all undefined elements should be at the end of the array.
+	4. It should sort array-like objects as well. 
+
+ Callback Specifications: 
+	5. If callback, it should sort all defined elements by their return value of the callback.
+	6. If callback(A, B) returns a negative number, it should sort A to a lower index than B (A comes first). 
+	7. If callback(A, B) returns zero, it should leave A & B unchanged in relation to each other, but still sorted in relation to the other elements.
+	8. If callback(A, B) returns a postive number, it should sort A to higher index than B (B comes first).
+	9. If callback, all undefined elements are sorted to the end of the array.  
+*/
+
+function sort(array, compareCallback){
+ 
+	// A default compare function. 
+	function defaultCompare(a, b) {
+		// Converts parameters into strings & compares their UTF-16 values.
+		a = '' + a;
+		b = '' + b;
+		// Returns negative if 'a' comes first, positive if 'b' comes first. 
+		return a.localeCompare(b);
+	}
+
+	function compareFunction (a, b) {
+		// Handles undefined values.
+		if (a === undefined && b != undefined) {
+			return 1;
+		}
+		// If a callbackCompare was given, run that. Otherwise run defaultCompare. 
+		if (compareCallback) {
+			return compareCallback(a, b);
+		} else {
+			return defaultCompare(a, b);	
+		}
+	}
+
+	// Compares & swaps values.
+	// We avoid changing i (outer loop variable), until we know the value at i won't return +1 when compared to any value after it.
+	var i = 0;
+	while (i < array.length) { 
+		var item = array[i];
+		var itemIndex = i;
+		var didSwapOccur = false; 
+		
+		// Inner-loop keeps running until there is a perfect run where no value after i return +1
+		for (var j = i + 1; j < array.length; j++) {
+			var comparison = compareFunction(item, array[j]);
+			// If a value returns +1, we swap positions. 
+			if (comparison > 0) {
+				array[itemIndex] = array[j]
+				array[j] = item;
+				itemIndex = j;
+				didSwapOccur = true;
+			}
+		}
+
+		// If no indexes were swapped, we know i has the correct value and we can move on.
+		// Otherwise, we run the j-loop again. 
+		if (didSwapOccur === false) {
+			i++;
+		}
+	}
+
+	return array;
+} 
+
+tests({
+	'1. It should return a sorted array, not a new array.': function(){
+		var array = [4, 5, 3, 77, 11];
+		var result = sort(array);
+		eq(result, array);
+	},
+	'2. If no callback, it should sort elements in ascending order by the UTF-16 of each element code after being converted into strings.': function(){
+		var array = [12, 9, 3, 77, 22, 4, 8];
+		var result = sort(array);
+		eq(result[0], 12);
+		eq(result[1], 22);
+		eq(result[6], 9);
+	},
+	'3. If no callback, all undefined elements should be at the end of the array.': function(){
+		var array = [4,,,,,, 6,, 7, 11,,, 4];
+		var result = sort(array);
+		eq(array[5], undefined);
+		eq(array[6], undefined);
+		eq(array[7], undefined);
+		eq(array[8], undefined);
+		eq(array[9], undefined);
+		eq(array[10], undefined);
+	},
+	'4. It should sort array-like objects too.': function() {
+		var zoo = { 0: 'zebra', 1: 'tiger', 2: 'antelope', 3: 'crane', length: 4 };
+		sort(zoo);
+		eq(zoo[0],'antelope');
+		eq(zoo[1], 'crane');
+		eq(zoo[2], 'tiger');
+		eq(zoo[3], 'zebra');
+	},
+	'5. If callback, it should sort all defined elements by their callback return values.': function(){
+		var array = [4, 9, 1, 5, 10, 3, 8, 2, 6, 7];
+		sort(array, function(a, b){
+			if (a > b) {
+				return 1;
+			} else {
+				return -1;
+			}
+		})
+		eq(array[0], 1);
+		eq(array[1], 2);
+		eq(array[8], 9);
+		eq(array[9], 10);
+	},
+	'6. If callback(A, B) returns a negative number, it should sort A to a lower index than B (A comes first). ': function(){
+		var array = [4, 9, 1, 5, 10, 3, 8, 2, 6, 7];
+		sort(array, function(a, b){
+			return a - b;
+		})
+		eq(array[0], 1);
+		eq(array[1], 2);
+		eq(array[8], 9);
+		eq(array[9], 10);
+	},
+	'7. If callback(A, B) returns zero, it should leave A & B unchanged in relation to each other, but still sorted in relation to the other elements.': function(){
+		var array = [4, 4, 1, 4, 10, 4, 9, 4, 2, 4];
+		var result = sort(array, function(a, b){
+			return a - b;
+		})
+		eq(result[0], 1);
+		eq(result[1], 2);
+		eq(result[3], 4);
+		eq(result[7], 4);
+		eq(result[8], 9);
+		eq(result[9], 10);
+
+	},
+	'8. If callback(A, B) returns a postive number, it should sort A to higher index than B (B comes first).': function(){
+		var array = [6, 7, 9, 4, 8, 10, 1, 5, 3, 2];
+		sort(array, function(a, b){
+			return b - a;
+		})
+		eq(array[0], 10);
+		eq(array[1], 9);
+		eq(array[2], 8);
+		eq(array[8], 2);
+		eq(array[9], 1);
+						
+	},
+	'9. If callback, all undefined elements are sorted to the end of the array.': function(){
+		var array = [10, 4, 5, undefined, undefined, 4, 44, undefined, 9, undefined];
+		sort(array, function(a, b){
+			return a - b;
+		});
+		eq(array[0], 4);
+		eq(array[2], 5);
+		eq(array[7], undefined);
+		eq(array[9], undefined);
+	}
+});
+
+
+</script>

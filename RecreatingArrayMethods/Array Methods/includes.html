@@ -1,0 +1,126 @@
+<script src="../simpletest.js"></script>
+
+<script>
+
+/*
+Function Description:
+	includes() determines if an array contains a given value. It returns TRUE if the array contains the value, FALSE if the array does not contain the value.  
+
+Prototype Implementation:
+	includes(array, value){
+		for (var i = 0; i < array.length; i++) {
+			if (array[i] === value) {
+				return true;
+			}
+		}
+		return false; 
+	}
+
+Function Signature: 
+	includes(arrayToSearch, valueToFind[, indexToStartAt])
+
+Requirements:
+
+Function Behavior & Return Values:
+1. It should compare values using strict equality (===)
+2. It should return true as soon as it discovers the value in the array.
+3. It should return false if it never discovers the value in the array.
+4. If the provided array is empty, it should return false. 
+5. If the first argument is not an array, it should throw a TypeError.
+
+If a Starting Index is provided:
+6. If a startingIndex is provided, it should search the array starting at that index and ignore values before it.
+7. If a startingIndex is provided that is larger than array.length, it should return false.
+8. If a startingIndex is provided that is negative, it should search the array starting at array.length + startingIndex.
+9. If a startingIndex is NOT provided, it it should search the array starting at index 0.
+
+*/
+
+function includes(arrayToSearch, valueToFind, startingIndex){
+	
+	// Check if the first argument is an array
+	if (arrayToSearch instanceof Array === false) {
+		throw new TypeError('First argument is not of type Array');
+	}
+
+	// VARIABLE:
+	// The starting index for the for-loop.
+	var indexToStartSearchingAt = 0;
+	
+	// If startingIndex is greater than 0, set it as the for-loop's starting index
+	if (startingIndex > 0) {
+		indexToStartSearchingAt = startingIndex;
+	// If startingIndex is negative, use it as an off-set value from the end of the array.
+	} else if (startingIndex < 0) {
+		indexToStartSearchingAt = arrayToSearch.length + startingIndex; 
+	}
+
+	// Loop thru array, return true as soon as the valueToFind is found.
+	for (var i = indexToStartSearchingAt; i < arrayToSearch.length; i++) {
+		if (arrayToSearch[i] === valueToFind) {
+			return true; 
+		}
+	}
+
+	// If we reach here, the value was not present in the array. Return false.
+	return false; 
+}
+
+tests({
+	'1. It should compare values using strict equality (===).': function(){
+		var array = [1, '2', 3];
+		var result = includes(array, 2);
+		eq(result, false);	
+	},
+	'2. It should return true if it discovers the value in the array.': function(){
+		var array = [0, 1, 2, 3, 4, 5];
+		var result = includes(array, 3);
+		eq(result, true);	
+	},
+	'3. It should return false if it never discovers the value in the array.': function(){
+		var array = [0, 1, 2, 3, 4, 5];
+		var result = includes(array, 95);
+		eq(result, false);		
+	},
+	'4. If the provided array is empty, it should return false.': function(){
+		var emptyArray = [];
+		var result = includes(emptyArray, 0);
+		eq(result, false);
+	},
+	'5. If the first argument passed in is not of type Array, it should return a TypeError': function(){
+		var notAnArray = 94;
+		var isTypeError = false; 
+		try {
+			includes(notAnArray, 94);
+		} catch (e) {
+			isTypeError = (e instanceof TypeError);
+		}
+		eq(isTypeError, true);
+	},
+	'6. If a startingIndex is provided, it should search the array starting at that index and ignore values before it.': function(){
+		var array = [0, 1, 2, 3, 4, 5];
+		var result = includes(array, 1, 4);
+		eq(result, false);	
+	},
+	'7. If a startingIndex is provided that is larger than array.length, it should return false.': function(){
+		var array = [0, 1, 1, 1, 4, 5];
+		var result = includes(array, 1, 90);
+		eq(result, false);	
+	},
+	'8. If a startingIndex is provided that is negative, it should search the array starting at array.length + startingIndex.': function(){
+		var array = [0, 1, 2, 3, 4, 5];
+		var startingIndex = -3;
+		var resultFalse = includes(array, 1, startingIndex);
+		var resultTrue = includes(array, 5, startingIndex);
+		eq(resultFalse, false);
+		eq(resultTrue, true);
+	},
+	'9. If a startingIndex is NOT provided, it it should search the array starting index 0.':function(){
+		var array = [0, 1, 2, 3, 4, 5];
+		var result = includes(array, 0);
+		eq(result, true);	
+	}
+});
+
+
+</script>

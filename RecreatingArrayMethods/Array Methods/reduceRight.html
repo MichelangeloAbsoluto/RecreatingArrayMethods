@@ -1,0 +1,239 @@
+<script src="../simpletest.js"></script>
+
+<script>
+
+/*
+Function Description:
+	reduceRight reduces an array to a single-value by accumulating every value from right-to-left (backwards) according to a callback function.
+
+Prototype Implementation:
+	reduceRight(array, callback, initialValue) {
+		var resultSoFar = initialValue; 
+		for (var i = 0; i < array.length; i++) {
+			resultSoFar = callback(resultSoFar, array[i], i);
+		}
+		return resultSoFar;
+	}
+
+Function Signature: 
+	reduceRight(array, callback, [initialValue])
+
+Callback Parameters: 
+	resultSoFar (previousValue or accumulator)
+	currentValue 
+	currentIndex (OPTIONAL)
+	array (OPTIONAL)
+
+Requirements:
+
+Callback Parameters:
+1. It should pass in the accumulated value (resultSoFar) so far as the first argument to the callback.
+2. It should pass in the ith element (currentValue) as the second argument to the callback.
+3. It should pass in the ith index (currentIndex) as the third argument to the callback.
+4. It should pass in the array being reduced as the fourth argument to the callback.
+
+Callback Behavior:
+5. The callback should start on the last index of the array.
+6. The callback should end on the first index of the array. 
+7. The callback should NOT visit holes.
+
+If Initial Value is provided:
+8. If an Initial Value is provided, the callback should run array.length times.
+9. If an Initial Value is provided, resultSoFar should start as the Initial Value and currentValue should start as the array[array.length - 1].
+10. If an Initial Value is provided and the array is empty, the initialValue is returned without running the callback.
+
+If Initial Value is not provided:
+11. If no Initial Value is provided, the callback should run array.length - 1 times.
+12. If no Initial Value is provided, the resultSoFar should start as the last value in the array and currentValue shoulld start as the second-to-last value. 
+13. If no Initial Value is provided and Array only has 1 element, that 1 value is returned without running the callback. 
+14. If no Initial Value is provided and Array is empty, it should throw a TypeError.
+
+Misc:
+15. It should actually reduce the array. 
+
+*/
+
+function reduceRight(array, callback, initialValue){
+	// VARIABLES:
+	// Starting point of for-loop, accumulated value of elements so far
+	var startingIndex = array.length - 1;
+	var resultSoFar = 0;
+
+	// If initialValue exists, resultSoFar = initialValue.
+	if (arguments.length > 2) {
+		resultSoFar = initialValue;
+	// If initialValue does not exist...
+	} else {
+		// ...and array is empty, throw error.
+		if (array.length === 0) {
+			throw new TypeError('Sorry!');
+		}
+		// ...resultSoFar = the last value in array & starting point of for-loop decrements by 1. 
+		resultSoFar = array[startingIndex];
+		startingIndex--;
+	}
+
+	for (var i = startingIndex; i >= 0; i--) {
+		// Only run callback on indexes with real values (no holes).
+		if (i in array) {
+			resultSoFar = callback(resultSoFar, array[i], i, array);
+		}
+	}
+
+	return resultSoFar;
+};
+
+tests({
+	'1. It should pass in the accumulated value (resultSoFar) so far as the first argument to the callback.':function(){
+		var testArray = [10, 20, 20, 60];
+		reduceRight(testArray, function(accumulator, currentValue){
+			if (currentValue === 10) {
+				eq(accumulator, 100);
+			}
+			return accumulator + currentValue;
+		}, 0)
+	},
+	'2. It should pass in the ith element (currentValue) as the second argument to the callback.':function(){
+		var testArray = [10, 70, 3, 99];
+		var positionInTestArray = testArray.length - 1;
+		reduceRight(testArray, function(accumulator, currentValue){
+			eq(currentValue, testArray[positionInTestArray]);
+			positionInTestArray--;
+		}, 0)
+	},
+	'3. It should pass in the ith index (currentIndex) as the third argument to the callback.':function(){
+		var testArray = [10, 70, 3, 99];
+		var positionInTestArray = testArray.length - 1;
+		reduceRight(testArray, function(accumulator, currentValue, currentIndex){
+			eq(currentIndex, positionInTestArray);
+			positionInTestArray--;
+		}, 0)
+	},
+	'4. It should pass in the array being reduced as the fourth argument to the callback.':function(){
+		var testArray = [10, 70, 3, 99];
+		reduceRight(testArray, function(accumulator, currentValue, currentIndex, array){
+			eq(array, testArray);
+		}, 0)
+	},
+	'5. The Callback should start on the last index of the array.': function(){
+		var testArray = [17, 5, 50, 55];
+		var firstValueProcessed = 0;
+		var timesCallbackHasRun = 0;
+		
+		reduceRight(testArray, function(accumulator, currentValue){
+			if (timesCallbackHasRun === 0) {
+				firstValueProcessed = currentValue;
+			}
+			timesCallbackHasRun++;
+		}, 0)
+		// Checks if the callback started on the end of the array
+		eq(firstValueProcessed, testArray[3]);
+	},
+	'6. The Callback should end on the first index of the array.':function(){
+		var testArray = [17, 5, 50, 55];
+		var finalValueProcessed = 0;
+		reduceRight(testArray, function(accumulator, currentValue){
+			finalValueProcessed = currentValue;
+		})
+		// Checks if the callback ends on testArray[0]
+		eq(finalValueProcessed, testArray[0]);
+	},
+	'7. The Callback should NOT visit holes.':function(){
+		var testArray = [,,,3,,5,,,,9];
+		var timesCallbackHasRun = 0;
+		reduceRight(testArray, function(){
+			timesCallbackHasRun++;
+		}, 0)
+		eq(timesCallbackHasRun, 3);
+	},
+
+	// TESTS FOR CASES WHEN INITIAL VALUE IS PROVIDED
+
+	'8. If an Initial Value is provided, the callback should run array.length times.':function(){
+		var testArray = [6, 12, 18, 24, 30, 36]
+		var timesCallbackHasRun = 0;
+		reduceRight(testArray, function(){
+			timesCallbackHasRun++;
+		}, 0)
+		eq(timesCallbackHasRun, 6);
+	},
+	'9. If an Initial Value is provided, resultSoFar should start as the Initial Value and currentValue should start as the array[array.length - 1].':function(){
+		var testArray = [7, 14, 21, 28, 35, 42, 49];
+		var initialValue = 300;
+		var timesCallbackHasRun = 0;
+		reduceRight(testArray, function(resultSoFar, currentValue, currentIndex){
+			if (timesCallbackHasRun === 0) {
+				eq(resultSoFar, initialValue);
+				eq(currentValue, 49);
+			}
+			timesCallbackHasRun++;
+		}, initialValue)
+
+	},
+	'10. If an Initial Value is provided and the array is empty, the initialValue is returned without running the callback.':function(){
+		var testArray = [];
+		var initialValue = 44;
+		var timesCallbackHasRun = 0;
+
+		var result = reduceRight(testArray, function(){
+			timesCallbackHasRun++;
+		}, initialValue)
+
+		eq(result, initialValue);
+		eq(timesCallbackHasRun, 0);
+	},
+
+	// TESTS FOR CASES WHEN INITIAL VALUE IS NOT PROVIDED
+
+	'11. If no Initial Value is provided, the callback should run array.length - 1 times.':function(){
+		var testArray = [8, 16, 24, 32, 40, 48, 56, 64]
+		var timesCallbackHasRun = 0;
+		reduceRight(testArray, function(){
+			timesCallbackHasRun++;
+		})
+		eq(timesCallbackHasRun, 7);
+	},
+	'12. If no Initial Value is provided, the resultSoFar should start as the last value in the array and currentValue shoulld start as the second-to-last value. ':function(){
+		var testArray = [9, 18, 27, 36, 45, 54, 63, 72, 81]; 
+		var timesCallbackHasRun = 0;
+
+		reduceRight(testArray, function(resultSoFar, currentValue, currentIndex, array){
+			if (timesCallbackHasRun === 0) {
+				eq(resultSoFar, 81);
+				eq(currentValue, 72);
+				eq(currentIndex, 7);
+			}
+			timesCallbackHasRun++;
+		})
+	},
+	'13. If no Initial Value is provided and Array only has 1 element, that 1 value is returned without running the callback.':function(){
+		var testArray = [42];
+		var timesCallbackHasRun = 0;
+		var result = reduceRight(testArray, function(){
+			timesCallbackHasRun++;
+		})
+		eq(result, 42);
+		eq(timesCallbackHasRun, 0);
+	},
+	'14. If no InitialValue is provided and Array is empty, it should throw a TypeError.':function(){
+		var testArray = [];
+		var isTypeError = false; 
+		try {
+			reduceRight(testArray, function(){})
+		} catch(e) {
+			isTypeError = (e instanceof TypeError);
+		}
+		eq(isTypeError, true);
+
+	},
+	'15. It should actually reduce the array.':function(){
+		var testArray = [5, 70, 100];
+		var result = reduceRight(testArray, function(accumulator, currentValue){
+			return accumulator + currentValue;
+		})
+		eq(result, 175);
+	},	
+});
+
+
+</script>

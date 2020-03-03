@@ -1,0 +1,259 @@
+<script src="../simpletest.js"></script>
+
+<script>
+
+/*
+Function Description:
+	splice() changes the elements of an array by removing or replacing existing elements, or adding new elements. It returns an array of the deleted elements. 
+
+Prototype Implementation:
+
+Function Signature: 
+	splice(array, startIndex, [deleteCount], [itemToAdd], ...[itemsToAdd])
+
+Requirements:
+	
+Function Behavior & Return Values: 
+	1. It should change the array at index StartIndex.
+	2. If more elements were deleted from the array than added, the array should have a new length.
+	3. If more elements were added to the array than deleted, the array should have a new length.
+	4. It should return an array of the deleted elements.
+	5. If no elements were deleted, it should return an empty array.
+	
+Starting Index Specifications:
+	6. If startIndex is greater than the length of the array, no items are removed, but items are still added to the end of the array.
+	7. If startIndex is negative, it will be used as an off-set value from the end.
+	8. If startIndex is negative and the off-set value is still negative, then it should change the array at index 0.
+
+Delete Count Specifications
+	9. It should remove deleteCount elements from the array at index startIndex.
+	10. If deleteCount is not provided, it should delete all the items from startIndex onwards.
+	11. If deleteCount is greater than the number of elements after startIndex, it should delete all the items from startIndex onwards.
+	12. If deleteCount is zero, no elements should be removed.
+	13. If deleteCount is negative, no elements should be removed.
+
+Items To Add Specifications: 
+	14. It should insert itemToAdd element at StartIndex.
+	15. If should insert as many itemToAdd elements as are passed into the argument.
+	16. If multiple itemToAdd elements are passed into the argument, elements that weren't removed after startIndex should have their indexes shifted accordingly.
+	17. If multiple itemToAdd elements are into the argument, the first should occur at array[startIndex], the next at array[startIndex + 1], the next at array[startIndex + 2], etc.
+	
+*/
+
+function splice(array, startIndex, deleteCount, itemToAdd){
+	
+	// Logic of Function: 
+	// It pops all elements after startIndex off of original array. Stores them in a temp array. 
+	// It pushes all itemToAdd elements to end of original array. 
+	// It deletes deleteCount elements from temp array. 
+	// It pushes remaining elements from temp array onto end of original array.  
+
+	// VARIABLES:
+	// Index to start deleting at.
+	// Index to stop deleting at.
+	// Fixed variable for length of array.
+	// Empty array to store items to add.
+	// Empty array to store deleted items.
+	var deleteStartIndex = startIndex;
+	var deleteEndIndex = array.length; 
+	var originalArrayLength = array.length;
+	var itemsToAdd = [];
+	var itemsDeleted = [];
+
+	// If startIndex is negative, use as an off-set value from end of array. 
+	if (startIndex < 0) {
+		deleteStartIndex = array.length + startIndex;
+		if (deleteStartIndex < 0) {
+			deleteStartIndex = 0;
+		}
+	} 
+	// If deleteCount provided, use to determine proper deleteEndIndex. 
+	if (arguments.length > 2 && deleteCount < array.length) {
+		deleteEndIndex = deleteStartIndex + deleteCount;
+	}
+	// If adding items, build an array of all the items to add. 
+	if (arguments.length > 3) {
+		for (var i = 3; i < arguments.length; i++) {
+			itemsToAdd.push(arguments[i]);
+		}
+	}
+
+	// Pop all items from deleteStartIndex onwards off of Array & push them onto temp array.
+	var tempArray = [];
+	for(var i = deleteStartIndex; i < originalArrayLength; i++) {
+		var poppedElement = array.pop();
+		tempArray.push(poppedElement);
+	}
+
+	// Push all elements from itemsToAdd array onto end of original Array
+	for (var i = 0; i < itemsToAdd.length; i++) {
+		array.push(itemsToAdd[i]);
+	}
+
+	// Reverse temp array so values are in their original order. 
+	// All elements before deleteCount index, we push to deletedItems array. 
+	// All elements after deleteCount index, we push back onto original array. 
+	tempArray.reverse(); 
+	for (var i = 0; i < tempArray.length; i++) {
+		if (i < deleteEndIndex - deleteStartIndex) {
+			itemsDeleted.push(tempArray[i]);
+		} else {
+			array.push(tempArray[i]);
+		}
+	}
+
+	// Return array of all items deleted during splicing.
+	return itemsDeleted;
+} 
+
+tests({
+	'1. It should change the array at index StartIndex.':function(){
+		var array = [0, 1, 2, 3, 4, 5];
+		var startIndex = 3;
+		var deleteCount = 2;
+		splice(array, startIndex, deleteCount);
+		eq(array[2], 2);
+		eq(array[3] === 3, false);
+
+	},
+	'2. If more elements were deleted from the array than added, the array should have a new length.':function(){
+		var array = [0, 1, 2, 3, 4, 5];
+		var startIndex = 3;
+		var deleteCount = 2;
+		splice(array, startIndex, deleteCount);
+		eq(array.length === 6, false);
+		eq(array.length, 4);
+		eq(array[3] === 3, false);
+
+	},
+	'3. If more elements were added to the array than deleted, the array should have a new length.':function(){
+		var array = [0, 1, 2, 3, 4];
+		var originalLength = array.length
+		var startIndex = 3; 
+		var deleteCount = 2; 
+		splice(array, startIndex, deleteCount, 11, 12, 13, 14);
+		eq(array.length === originalLength, false);
+		eq(array.length, 7);
+	},
+	'4. It should return an array of the deleted elements.':function(){
+		var array = [0, 1, 2, 3, 4, 5];
+		var startIndex = 4;
+		var result = splice(array, startIndex);
+		eq(result instanceof Array, true);
+		eq(result.includes(4), true);
+		eq(result.includes(5), true);
+	},
+	'5. If no elements were deleted, it should return an empty array.': function(){
+		var array = [0, 1, 2, 3];
+		var result = splice(array, 4);
+		eq(result.length < 1, true);
+		eq(result.length, 0);
+	},
+	'6. If startIndex is greater than the length of the array, no items are removed, but items are still added to the end of the array.':function(){
+		var array = [0, 1, 2, 3];
+		var startIndex = 5;
+		var deleteCount = 0; 
+		var itemToAdd = 4;
+		splice(array, startIndex, deleteCount, itemToAdd);
+		eq(array.length > 4, true);
+		eq(array[4] === undefined, false);
+	},
+	'7. If startIndex is negative, it will be used as an off-set value from the end.':function(){
+		var array = [0, 1, 2, 3, 4, 5];
+		var startIndex = -2;
+		var deleteCount = 2; 
+		splice(array, startIndex, deleteCount);
+		eq(array[4] === 4, false);
+		eq(array[5] === 5, false);
+	},
+	'8. If startIndex is negative and the off-set value is still negative, then it should change the array at index 0.':function(){
+		var array = [0, 1, 2, 3];
+		var startIndex = -8;
+		var deleteCount = 2; 
+		splice(array, startIndex, deleteCount);
+		eq(array[0] === 0, false);
+		eq(array[1] === 1, false);
+	},
+	'9. It should remove deleteCount elements from the array at index startIndex.':function(){
+		var array = [0, 1, 2, 3, 4, 5, 6];
+		var startIndex = 4;
+		var deleteCount = 3;
+		splice(array, startIndex, deleteCount);
+		eq(array[3] === 3, true);
+		eq(array[4] === 4, false);
+		eq(array[5] === 5, false);
+		eq(array[6] === 6, false);
+	},
+	'10. If deleteCount is not provided, it should delete all the items from startIndex onwards.':function(){
+		var array = [0, 1, 2, 3, 4];
+		var startIndex = 2;
+		splice(array, startIndex);
+		eq(array[1] === 1, true);
+		eq(array[2] === 2, false);
+		eq(array[3] === 3, false);
+		eq(array[4] === 4, false);
+	},
+	'11. If deleteCount is greater than the number of elements after startIndex, it should delete all the items from startIndex onwards.':function(){
+		var array = [0, 1, 2, 3, 4];
+		var startIndex = 3;
+		var deleteCount = 15;
+		splice(array, startIndex, deleteCount);
+		eq(array[2] === 2, true);
+		eq(array[3] === 3, false);
+		eq(array[4] === 4, false);
+	},
+	'12. If deleteCount is zero, no elements should be removed.':function(){
+		var array = [0, 1, 2, 3, 4];
+		var startIndex = 3;
+		var deleteCount = 0;
+		splice(array, startIndex, deleteCount);
+		eq(array[3] === 3, true);
+		eq(array[4] === 4, true);
+	},
+	'13. If deleteCount is negative, no elements should be removed.':function(){
+		var array = [0, 1, 2, 3, 4];
+		var startIndex = 3;
+		var deleteCount = -2;
+		splice(array, startIndex, deleteCount);
+		eq(array[0] === 0, true)
+		eq(array[3] === 3, true);
+		eq(array[4] === 4, true);
+	},
+	'14. It should insert itemToAdd element at StartIndex.':function(){
+		var array = [0, 1, 2, 3, 5, 6];
+		var startIndex = 4;
+		var deleteCount = 0;
+		var itemToAdd = 4;
+		splice(array, startIndex, deleteCount, itemToAdd);
+		eq(array[3], 3);
+		eq(array[4], 4);
+		eq(array[5], 5);
+	},
+	'15. If should insert as many itemToAdd elements as are passed into the argument.':function(){
+		var array = [0, 1, 2, 3];
+		var startIndex = 3;
+		var deleteCount = 0;
+		splice(array, startIndex, deleteCount, 4, 5, 6, 7, 8);
+		for (var i = 4; i < 9; i++) {
+			eq(array.includes(i), true);
+		}
+	},
+	'16. If multiple itemToAdd elements are passed into the argument, elements that were not removed after startIndex should have their indexes shifted accordingly.':function(){
+		var array = [0, 1, 2, 3, 7, 8];
+		splice(array, 4, 0, 4, 5, 6);
+		eq(array[7], 7);
+		eq(array[8], 8);
+	},
+	'17. If multiple itemToAdd elements are into the argument, the first should occur at array[startIndex], the next at array[startIndex + 1], the next at array[startIndex + 2], etc.':function(){
+		var array = [0, 1, 2, 3, 7, 8];
+		var startIndex = 4;
+		splice(array, startIndex, 0, 4, 5, 6);
+		eq(array[startIndex], 4);
+		eq(array[startIndex + 1], 5);
+		eq(array[startIndex + 2], 6)
+	},
+
+});
+
+
+</script>

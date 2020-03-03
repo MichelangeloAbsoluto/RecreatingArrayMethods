@@ -1,0 +1,112 @@
+<script src="../simpletest.js"></script>
+
+<script>
+
+/*
+Function Description:
+	reverse() reverses the order of elements in a given array. It returns a modified array. 
+
+Prototype Implementation:
+	reverse(array) {
+			var arrayCopy = [];
+			for (var i = 0; i < array.length; i++) {
+				arrayCopy[i] = array[i];
+			}
+			for (var i = 0; i < array.length; i++) {
+				array[i] = arrayCopy[array.length - i];
+			}
+			return array; 
+		}
+
+Function Signature: 
+	reverse(array)
+
+Requirements:
+
+1. It should reverse the order of elements of an array.
+2. It should modify the array, not create a new array.
+3. It should return an array that still contains all its original values.
+
+4. The length of the array should be the same.
+5. If the array is empty, it should return an empty array.
+6. If the given object is not an array, it should return a TypeError.
+
+*/
+
+function reverse(array){
+	
+	// Make sure provided argument is an array. 
+	if (array instanceof Array === false) {
+		throw new TypeError('Danger Mr. Robinson: object is not of type Array.');
+	}
+
+	// VARIABLES: 
+	// Empty array to copy the original array's values into, length of array, final index of array.
+	var arrayCopy = [];
+	var length = array.length;
+	var finalIndex = length - 1;
+	
+	// Copy the original arrays values so we can reference them later. 
+	for (var i = 0; i < length; i++) {
+		arrayCopy[i] = array[i];
+	}
+	
+	// Fill the array with its old values in reverse order. Use Copy to get values.
+	for (var i = 0; i < length; i++) {
+		array[i] = arrayCopy[finalIndex - i];
+	}
+
+	// Return the reversed array.
+	return array;
+} 
+
+tests({
+	'1. It should reverse the order of elements of an array.': function(){
+		var array = [0, 1, 2, 3];
+		reverse(array);
+		eq(array[0], 3);
+		eq(array[1], 2);
+		eq(array[2], 1);
+		eq(array[3], 0);	
+	},
+	'2. It should modify the array, not create a new array.': function(){
+		var array = [0, 1, 2, 3];
+		var result = reverse(array);
+		eq(result, array);
+		eq(array[0], 3);
+		eq(array[1], 2);
+		eq(array[2], 1);
+		eq(array[3], 0);	
+	},
+	'3. It should return an array that still contains all its original values.': function(){
+		var array = [44, 9, 0, 'nas', 3, 'marvin bagley'];
+		var result = reverse(array);
+		for (var i = 0; i < array.length; i++) {
+			eq(result.includes(array[i]), true);
+		}	
+	},
+	'4. The length of the array should be the same.': function(){
+		var array = [99, 100, 1, 55, 'jefferson'];
+		var originalLength = array.length; 
+		reverse(array);
+		eq(originalLength, array.length);
+	},
+	'5. If the array is empty, it should return an empty array.': function(){
+		var emptyArray = [];
+		var result = reverse(emptyArray);
+		eq(result.length < 1, true);
+	},	
+	'6. If the given object is not an array, it should return a TypeError.': function(){
+		var notAnArray = "Dearon Fox";
+		var isTypeError = false; 
+		try {
+			reverse(notAnArray);
+		} catch (e) {
+			isTypeError = (e instanceof TypeError);
+		}
+		eq(isTypeError, true);
+	}
+});
+
+
+</script>

@@ -1,0 +1,108 @@
+<script src="../simpletest.js"></script>
+
+<script>
+
+/*
+Function Description:
+	join() creates & returns a new string by concatenating all the values of given array separated by commas or a specified separator.  
+
+Prototype Implementation:
+	join(array, separator) {
+		var stringToReturn = '';
+		for (var i = 0; i < array.length; i++) {
+			stringToReturn += array[i] + separator;
+		}
+		return stringToReturn;
+	}
+
+Function Signature: 
+	slice(array[, separator])
+
+Requirements:
+
+Function Behavior:
+1. It should return a string.
+2. It should return a string containing all the elements of the array.
+3. If the array only has one element, it should return that one element as a string with no separator.
+4. If the array is empty, it should return a an empty string.
+5. It should not add the separator after the final element. 
+
+Separator:
+6. If a separator is provided, it should return all the elements of the array separated by the provided separator. 
+7. If a separator is NOT provided, it should return all the elements of the array seprated by commas. 
+
+*/
+
+function join(array, separator){
+	// VARIABLES: 
+	// Empty string to concatenate and return, default separatorString as a comma.
+	var stringToReturn = '';
+	var separatorString = ','
+	
+	// If a separator is provided, set it to be the separatorString.
+	if (separator) {
+		separatorString = separator;
+	}
+
+	// Loop thru array, concatenating each element w/ a separator to stringToReturn.
+	for (var i = 0; i < array.length; i++) {
+		// If it's not the final index, concatenate element & separator.
+		if (i != array.length - 1) {
+			stringToReturn += array[i] + separatorString;
+		// If it's the final index, only concatenate the element. No separator. 
+		} else {
+			stringToReturn += array[i];
+		}
+	}
+
+	return stringToReturn;
+}
+
+tests({
+	'1. It should return a string.': function(){
+		var array = [1, 2, 3, 4];
+		var result = join(array);
+		eq(typeof result, 'string');
+	},
+	'2. It should return a string that contains every element of the array.': function(){
+		var array = [1, 'auden', 2, 'frost'];
+		var result = join(array);
+		for (var i = 0; i < array.length; i++) {
+			eq(result.includes(array[i]), true);
+		}
+	},
+	'3. If the array only has one element, it should return that one element as a string with no separator.': function(){
+		var array = ['Karl Malone'];
+		var separator = "z"
+		var result = join(array, separator);
+		eq(result.includes(separator), false);	
+	},
+	'4. If the array is empty, it should return a an empty string.': function(){
+		var array = [];
+		var result = join(array);
+		eq(result.length, 0);
+	}, 
+	'5. It should NOT add the seprator after the final element': function(){
+		var array = ['Washington', 'Lincoln', 'Hamilton'];
+		var result = join(array);
+		eq(result.includes('Hamilton,'), false);
+	},
+	'6. If a separator is provided, it should return all the elements of the array separated by the provided separator.': function(){
+		var array = ['dearon fox', 'marvin bagley', 'buddy hield'];
+		var separator = ' zzz '
+		var result = join(array, separator);
+		for (var i = 0; i < array.length - 1; i++) {
+			eq(result.includes(array[i] + ' zzz '), true);
+		}
+	},
+	'7. If a separator is NOT provided, it should return all the elements of the array seprated by commas.': function(){
+		var array = ['dearon fox', 'marvin bagley', 'buddy hield'];
+		var result = join(array);
+		for (var i = 0; i < array.length - 1; i++) {
+			eq(result.includes(array[i] + ','), true);
+		}
+	}
+});
+
+
+</script>

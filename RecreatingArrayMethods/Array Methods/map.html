@@ -1,0 +1,105 @@
+<script src="../tinytest.js"></script>
+
+<script>
+
+// Example 6
+// var testArray = [1, 2, 3]
+// var filteredArray = filter(testArray, function(){
+// })
+// testArray !== filteredArray;
+
+// Example 7 
+// var testArray = [1, 2, 3];
+// var filteredArray = filter(testArray, function(element){
+//	return element > 1;
+// }) 
+// filteredArray = [2, 3];
+
+function map(originalArray, callback, optionalThisObject){
+	var mappingFunction = callback;
+	var mappedArray = [];
+
+	if (optionalThisObject) {
+		mappingFunction = callback.bind(optionalThisObject);
+	}
+
+	for (var i = 0; i < originalArray.length; i++){
+		if (i in originalArray){
+			mappedArray[i] = mappingFunction(originalArray[i], i, originalArray);
+		}
+	}
+
+	return mappedArray;
+}
+
+tests({
+
+  'It should run the callback function array.length number of times': function() {
+	var numberOfTimesCallbackHasRun = 0;
+	map([1, 2, 3], function(){
+		numberOfTimesCallbackHasRun++;
+	})
+	eq(numberOfTimesCallbackHasRun, 3);
+  },
+
+  'It should pass in the ith element as the first argument to the callback function': function() {
+  	map([1], function(number){
+  		eq(1, number);
+  	})
+  },
+  'It should pass in the position of i as the second argument to the callback function': function(){
+  	map([1], function(number, index){
+  		eq(0, index);
+  	})
+  },
+
+  'It should pass in the original array as the third argument to the callback function': function() {
+  	var testArray = [1, 2, 3];
+  	map(testArray, function(number, index, array) {
+  		eq(testArray, array);
+  	})
+  },
+  'It should accept an optional This object as a third parameter' : function(){
+  	var optionalThisObject = {
+  		name: 'atlas',
+  		birthplace: 'georgia'
+  	}
+
+  	map([1, 2, 3], function(number, index, array){
+  		eq(this.name, 'atlas'); 
+  	}, optionalThisObject)
+  },
+  'It should return an array': function(){
+  	var filterReturnObject = map([1, 2, 3], function(number) {
+  	})
+  	eq(Array.isArray(filterReturnObject), true);
+  },
+  'It should return a new array, not the array that was filtered': function(){
+  	var testArray = [];
+  	var mappedArray = map(testArray, function(){
+  	}) 
+  	eq(testArray === mappedArray, false);
+  },
+  'It should return an array of equal length to the original array': function(){
+  	var testArray = [1, 2, 3];
+  	var mappedArray = map(testArray, function(number){
+  		return number * 2;
+  	})
+  	eq(testArray.length === mappedArray.length, true);
+  },
+  'It should return a correctly mapped array': function(){
+  	var testArray = [1, 2, 3];
+  	var mappedArray = map(testArray, function(number){
+  		return number * 10;
+  	})
+  	eq(mappedArray[0], 10);
+  },
+  'It should add unassigned indexes but not map them': function(){
+  	var weirdArray =[, 5, 9];
+  	var mappedArray = map(weirdArray, function double(number){
+  		return number * 2;
+  	})
+  	eq(mappedArray[1], 10);
+  }
+});
+</script>

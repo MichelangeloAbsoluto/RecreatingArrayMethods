@@ -1,0 +1,126 @@
+<script src="../simpletest.js"></script>
+
+<script>
+
+/*
+Function Description:
+	lastIndexOf() returns the last index at which a given value is found. If the value is not present, it returns -1.
+
+Prototype Implementation:
+	for (var i = array.length - 1; i >= 0; i--) {
+		if (array[i] === valueToFind) {
+			return i; 
+		}
+	}
+	return -1;
+
+Function Signature: 
+	lastIndexOf(arrayToSearch, valueToFind[, startingIndex])
+
+Requirements:
+
+Function Behavior & Return Values:
+1. It should return the index where the value is first disovered.
+2. It should search the array backwards (starts at last index, ends at first index). 
+3. It should return -1 if it does not discover the value in the array.
+4. It should compare values using strict equality (===)
+
+If Starting Index is provided:
+5. If a startingIndex is provided,  the array should be searched starting at that index. 
+6. If a startingIndex is provided that is greater than array.length - 1, the whole array should be searched. 
+7. If a startingIndex is provided that is less than zero, it should be used as an off-set value. 
+8. If a startingIndex is provided that is less than zero and the off-set calculates to negative, then -1 is returned. 
+
+If Starting Index is not provided:
+9. If no startingIndex is provided, the whole array should be serached
+
+*/
+
+function lastIndexOf(arrayToSearch, valueToFind, startingIndex){
+	// Check first argument is actually an array.
+	if (arrayToSearch instanceof Array === false) {
+		throw new TypeError('First argument must be of type Array.');
+	}
+
+	// VARIABLE: 
+	// startingIndexOfSearch begins as the array's final index. 
+	var startingIndexOfSearch = arrayToSearch.length - 1;
+
+	// If a startingIndex was provided...
+	if (arguments.length > 2) {
+		// If it's negative, we use it as an offset value from the end of the array.
+		if (startingIndex < 0) {
+			startingIndexOfSearch += startingIndex;
+		// Otherwise, we use it as the indexToStart
+		} else {
+			startingIndexOfSearch = startingIndex; 
+		}
+	} 
+
+	// Loop through array, comparing each value to valueToFind
+	for (var i = startingIndexOfSearch; i >= 0; i--) {
+		if (arrayToSearch[i] === valueToFind) {
+			return i; 
+		}
+	}
+
+	return -1;
+};
+
+tests({
+	'1. It should return the index where valueToFind is first disovered.':function(){
+		var array = [3, 5, 100, 3, 49, 9];
+		var result = lastIndexOf(array, 100);
+		eq(result, 2);
+	},
+	'2. It should search the array backwards.':function(){
+		var array = [100, 5, 100, 3, 100, 7, 100, 9];
+		var result = lastIndexOf(array, 100);
+		eq(result, 6);
+	},
+	'3. It should return -1 if it does not discover valueToFind in the array.':function(){
+		var array = [3, false, 'gary coleman', 555, '1', 90];
+		var result = lastIndexOf(array, 4);
+		eq(result, -1);
+	},
+	'4. It should compare values using strict equality (===).':function(){
+		var array = [1, '2', 22, '2', 'two', 222];
+		var result = lastIndexOf(array, 2);
+		eq(result, -1);
+
+	},
+
+	'5. If a startingIndex is provided, the array should be searched starting at that index.': function(){
+		var array = [99, 3, 99];
+		var startingIndex = 1;
+		var result = lastIndexOf(array, 99, startingIndex);
+		eq(result, 0);
+	},
+	'6. If a startingIndex is provided that is greater than array.length - 1, the whole array should be searched.':function(){
+		var array = [13, 9, 22, 9, 22, 9, 22, 9];
+		var startingIndex = 100;
+		var result = lastIndexOf(array, 13, startingIndex);
+		eq(result, 0);
+	},
+	'7. If a startingIndex is provided that is less than zero, it should be used as an off-set value.':function(){
+		var array = [4, 8, 12, 16, 4, 16];
+		var startingIndex = -3;
+		var result = lastIndexOf(array, 4, startingIndex);
+		eq(result, 0);
+	},
+	'8. If a startingIndex is provided that is less than zero and the off-set calculates to a negative number, it should return -1.':function(){
+		var array = [4, 8, 12, 16, 4, 16];
+		var startingIndex = -33;
+		var result = lastIndexOf(array, 4, startingIndex);
+		eq(result, -1);
+	},
+	'9. If no startingIndex is provided, the entire array should be searched.':function(){
+		var array = [9, 33, 9, 3, 90, 'ovid', 9, 9];
+		var result = lastIndexOf(array, 9);
+		eq(result, array.length - 1);
+	},
+
+});
+
+
+</script>

@@ -1,0 +1,175 @@
+<script src="../simpletest.js"></script>
+
+<script>
+
+/*
+Function Description:
+	concat() merges two or more arrays. It returns a new array and does not modify the existing arrays.
+
+Prototype Implementation:
+	concat(array1, array2) {
+		var concatenatedArray = array1.slice();
+		for (var i = 0; i < array2.length; i++) {
+			concatenatedArray.push(array2[i]);
+		}
+		return concatenatedArray;
+	}
+
+Function Signature: 
+	concat(array1[, array2] ...arrays)
+
+Requirements:
+
+Return Array:
+1. It should return a new array. 
+2. It should return a new array consisting of all the elements in the passed arrays. 
+3. It should return a new array of elements in the same order as they were passed into the function parameters.
+
+Function Behavior:
+4. It should NOT access nested arrays. 
+5. It should NOT alter any of the arrays it concats. 
+6. It should copy object references and not actual objects, so if a referenced object is modified, changes will be visible to the original array and the concatenated array.
+7. It should copy values of data types into the new array 
+
+8. It should accept as many arrays as are passed in. 
+9. If only one array is passed into the arguments, it should return a new copy of the original array.
+10. It should throw a Syntax Error if the first argument is not an array.
+
+11. It should concatenate arrays and non-arrays. 
+
+*/
+
+
+function concat(array1){
+	// Check if the first argument is an array 
+	if (array1 instanceof Array === false) {
+		throw new SyntaxError('First argument must be of type array');
+	}
+
+	// VARIABLES: 
+	// The concatenated array we will return, & the number of arrays passed into the arguments
+	var arrayToReturn = array1.slice(0);
+	var totalArgumentsToConcat = arguments.length; 
+
+	// Loop through each of the arguments. 
+	for (var i = 1; i < totalArgumentsToConcat; i++){
+		var currentArgument = arguments[i]; 
+		
+		// If the argument is an array, loop thru it, pushing each value onto arrayToReturn
+		if (currentArgument instanceof Array) {
+			for (var j = 0; j < currentArgument.length; j++) {
+				arrayToReturn.push(currentArgument[j]);
+			}
+		// If the argument is not an array, push it onto arrayToReturn. 
+		} else {
+			arrayToReturn.push(currentArgument)
+		}
+	}
+	
+	return arrayToReturn;
+};
+
+tests({
+	'1. It should return a new array.':function(){
+		var array1 = [17, 444, 3];
+		var resultArray = concat(array1);
+		eq(array1 === resultArray, false);
+	},
+	'2. It should return a new array consisting of all the elements in the parameter arrays.':function(){
+		var array1 = [1, 2, 3, 4, 5,];
+		var array2 = [6, 7, 8, 9, 10];
+		var resultArray = concat(array1, array2);
+		for (var i = 0; i < array1.length; i++) {
+			eq(array1[i], resultArray[i]);
+		}
+		for (var j = 0; j < array2.length; j++) {
+			eq(array2[j], resultArray[i + j]);
+		}
+	},
+	'3. It should return a new array of elements in the same order as they were passed into the function parameters.':function(){
+		var array1 = [1, 2, 3, 4, 5,];
+		var array2 = [6, 7, 8, 9, 10];
+		var resultArray = concat(array2, array1);
+		for (var i = 0; i < array2.length; i++) {
+			eq(array2[i], resultArray[i]);
+		}
+		for (var j = 0; j < array1.length; j++) {
+			eq(array1[j], resultArray[i + j]);
+		}
+	},
+	'4. It should NOT access nested arrays.':function(){
+		var array1 = [1, 2, [3, 4, 5], 6];
+		var array2 = [7, [9, 99, 999], 8, [10, 11, 13]];
+		var resultArray = concat(array1, array2);
+		eq(resultArray[3], 6);
+		eq(resultArray[6], 8);
+	},
+	'5. It should NOT alter any of the arrays it concats.':function(){
+		var array1 = [1, 5, 15];
+		var array2 = [7, 49];
+		concat(array1, array2);
+		eq(array1[0], 1);
+		eq(array1[1], 5);
+		eq(array1[2], 15);
+	},
+	'6. It should copy object references and not actual objects, so if a referenced object is modified, changes will be visible to the original array and the concatenated array.':function(){
+		var objectToMutate = {
+			name: 'zion',
+			age: 19
+		};
+		var array1 = [objectToMutate, 2, 20];
+		var array2 = [25, 30, 50];
+		var resultArray = concat(array1, array2);
+		objectToMutate.age = 22;
+		eq(array1[0].age, 22);
+		eq(resultArray[0].age, 22);
+	
+	},
+	'7. It should copy values of data types into the new array.':function(){
+		var array1 = [5, false, 'zzz'];
+		var array2 = [4, true, 'eee'];
+		var resultArray = concat(array1, array2);
+		eq(resultArray[0], 5);
+		eq(resultArray[1], false);
+		eq(resultArray[5], 'eee');
+	},
+	'8. It should accept as many arrays as are passed into the parameter.':function(){
+		var array1 = [1, 2, 3];
+		var array2 = [4, 5, 6];
+		var array3 = [7, 8, 9];
+		var array4 = [10, 11, 12];
+		var resultArray = concat(array1, array2, array3, array4);
+		eq(resultArray.length, 12);
+	},
+	'9. If only one array is passed, it should return a copy of that original array.':function(){
+		var array1 = [17, 444, 3];
+		var resultArray = concat(array1);
+		for (var i = 0; i < array1.length; i++) {
+			eq(array1[i], resultArray[i]);
+		}
+	},
+	'10. The first argument must be an array, or it throws a Syntax Error': function(){
+		var notAnArray = 5;
+		var isSyntaxError = false; 
+		try {
+			concat(notAnArray);
+		} catch (e) {
+			if (e instanceof SyntaxError) {
+				isSyntaxError = true; 
+			}
+		}
+		eq(isSyntaxError, true);
+	},
+	'11. It should concatenate non-arrays.': function(){
+		var array = [1, 2, 3];
+		var resultArray = concat(array, 4, 5);
+		eq(resultArray.length, 5);
+		eq(resultArray[0], 1);
+		eq(resultArray[3], 4);
+		eq(resultArray[4], 5);
+	}
+
+});
+
+
+</script>

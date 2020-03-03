@@ -1,0 +1,69 @@
+<script src="../simpletest.js"></script>
+
+<script>
+/*
+Function Description:
+	push() adds one or more elements to the end of given array. It returns the new length of the mutated array. 
+
+Prototype Implementation:
+	push(array, element) {
+		array[array.length] = element;
+		return array.length;
+	}
+
+Function Signature: 
+	push(array, element[, element], ...[elements])
+
+Requirements:
+
+1. It should add given element to given array.
+2. It should add given element to the end of given array.
+3. It should return the new length of the array.
+4. It should add as many elements as are passed into the arguments.
+5. If the length of an array cannot be determined, it should add the element to index 0 of the array.
+
+*/
+
+function push(array, elementToAdd){
+	
+	// Loop through arguments, add each one to end of the array.
+	for (var i = 1; i < arguments.length; i++) {
+		array[array.length] = arguments[i];
+	}
+
+	return array.length;
+}
+
+tests({
+	'1. It should add given element to given array.':function(){
+		var array = [0, 1, 2, 3];
+		push(array, 4);
+		eq(array.includes(4), true);
+	},
+	'2. It should add given element to the end of given array.':function(){
+		var array = [0, 1, 2, 3];
+		push(array, 77);
+		eq(array[4], 77);
+	},
+	'3. It should return the new length of the array.':function(){
+		var array = [0, 1, 2, 3, 4];
+		var arrayLength = push(array, 66);
+		eq(arrayLength, 6);
+		eq(arrayLength, array.length);
+	},
+	'4. It should add as many elements as are passed into the arguments.':function(){
+		var array = [0, 1, 2];
+		push(array, 66, 55, 44);
+		eq(array.length, 6);
+		eq(array[3], 66);
+	},
+	'5. If the length of an array cannot be determined, it should add the element to index 0 of the array.':function(){
+		var array = [];
+		push(array, 66);
+		eq(array[0], 66);
+		eq(array.length, 1);
+	},
+});
+
+
+</script>

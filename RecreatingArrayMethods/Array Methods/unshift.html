@@ -1,0 +1,106 @@
+<script src="../simpletest.js"></script>
+
+<script>
+
+/*
+Function Description:
+	unshift() adds a given element to the beginning of a given array. It increases the length of the array by 1 and shifts every value's position up by 1. It returns the new length of the array. 
+
+Prototype Implementation:
+	unshift(array, value) {
+			for (var i = array.length; i > 0; i--) {
+				array[i] = array[i - 1];
+			}
+			array[0] = value;
+			return array.length;
+		}
+
+Function Signature: 
+	unshift(array, value[, value] ...values)
+
+Requirements:
+
+1. It should insert the given value at the index 0 of the array.
+2. It should insert as many values as are provided in the arguments.
+3. If multiple values are provided, it should insert them in the order they were passed (the first value should be index 0). 
+
+4. It should shift the index of existing values up by arguments.length - 1.
+5. It should increase the length of the array.
+6. It should return the new length of the array.
+
+*/
+
+function unshift(array, value){
+	
+	// VARIABLES: 
+	// The last index of the array, how many values were passed into the arguments.
+	var originalFinalIndex = array.length - 1;
+	var howManyValuesToAdd = arguments.length - 1;
+
+	// Create enough new indexes in array & copy existing values over.
+	for (var i = 0; i < howManyValuesToAdd; i++) {
+		array[originalFinalIndex + 1 + i] = array[i];
+	}
+
+	// Add new values to the beginning of array. 
+	for (var i = 1; i < arguments.length; i++) {
+		array[i - 1] = arguments[i];	
+	}
+
+	// Return the length of the mutated array. 
+	return array.length;
+} 
+
+tests({
+	'1. It should insert the given value at the beginning of the array.': function(){
+		var array = [1, 2, 3];
+		unshift(array, 99);
+		eq(array[0], 99);
+	},
+	'2. It should insert as many values as are provided in the arguments.': function(){
+		var array = [1, 2, 3];
+		unshift(array, 99, 100, 101, 102);
+		eq(array.includes(99), true);
+		eq(array.includes(100), true);
+		eq(array.includes(101), true);
+		eq(array.includes(102), true);
+	},
+	'3. If multiple values are provided, it should insert them in the order they were passed (the first value should be index 0). ': function(){
+		var array = [1, 2, 3];
+		unshift(array, 99, 100, 101, 102);
+		eq(array[0], 99);
+		eq(array[1], 100);
+		eq(array[2], 101);
+		eq(array[3], 102);
+	},
+	'4. It should shift the index of existing values up by arguments.length - 1.': function(){
+		var array = [1, 2, 3];
+		unshift(array, 100, 200, 300, 500, 600, 700);
+		eq(array[0], 100);
+		eq(array[6], 1);
+		eq(array[7], 2);
+		eq(array[8], 3);
+	},
+	'5. It should increase the legnth of the array by argumnets.length - 1.': function(){
+		var array = [1, 2, 3];
+		unshift(array, 100, 200, 300);
+		eq(array.length, 6);
+	},
+	'6. It should return the new length of the array.': function(){
+		var array = [1, 2, 3];
+		var result = unshift(array, 4, 4, 55, 7);
+		eq(result, array.length);
+		eq(result, 7)
+	},
+	'7. It should work with empty arrays.': function(){
+		var emptyArray = [];
+		unshift(emptyArray, 1, 2, 33);
+		eq(emptyArray.length, 3);
+		eq(emptyArray[0], 1);
+		eq(emptyArray[1], 2);
+		eq(emptyArray[2], 33);
+	}
+});
+
+
+</script>

@@ -1,0 +1,184 @@
+<script src="../simpletest.js"></script>
+
+<script>
+
+/*
+
+Function Description:
+every() tests every single element in an array returns true for its callback function. It returns TRUE if every element passes, FALSE if any element does not pass.
+
+Prototype Implementation:
+	function every(array, callbackFunction, optionalThisObject) {
+		for (var i = 0; i < array.length; i++) {
+			if (callbackFunction(array[i], i, array) === false) {
+				return false;
+			}
+		}
+		return true;	
+	}
+
+Function Signature: 
+	every(array, callback, optionalThisObject)
+
+Callback Parameters: 
+	currentElement
+	currentIndex (OPTIONAL)
+	arrayBeingSearched (OPTIONAL)
+	thisObject (OPTIONAL)
+	Returns TRUE if every element in an array returns true
+
+Requirements:
+
+1. It should pass in the ith element as the first argument to the callback.
+2. It should pass in the ith index as the second argument to the callback.
+3. It should pass in the array being traversed as the third argument to the callback.
+4. It should accept an optional THIS object.
+
+5. It should return false if a single element in the array returns false in the callback.
+6. It should return true if every element in the array returns true in callback. 
+7. It should return true for an empty array.   
+
+8. Callback should stop running as soon as a single element returns false. 
+9. Callback should NOT visit holes in the array. 
+10. Callback should NOT visit elements appended to array. 
+11. Callback should NOT visit elements that were deleted.
+12. If an element is changed before it is visited, the callback should visit the new value. 
+
+13. The array should not be mutated before being passed into the callback function.
+
+*/
+
+function every(array, callback, optionalThisObject){
+	// VARIABLES:
+	// Fixed array length for for-loop, callback function 
+	var arrayOriginalLength = array.length;
+	var callbackFunction = optionalThisObject ? callback.bind(optionalThisObject) : callback;
+
+	// Loop through array, testing if each element satisfies callback
+	for (var i = 0; i < arrayOriginalLength; i++) {
+		// Only run callback on real elements (not deleted elements or holes)
+		if (i in array) {
+			var isElementTrue = callbackFunction(array[i], i, array);
+			if (isElementTrue === false) {
+			return false; 
+			}
+		}
+	}
+
+	// If we reach here no element returned false, so every element is true. 
+	return true; 
+};
+
+tests({
+	'1. First argument passsed into Callback should be currentElement.':function(){
+		var testArray = [5];
+		every(testArray, function(currentElement){
+			eq(currentElement, 5)
+		})
+	},
+	'2. Second argument passsed into Callback should be currentIndex.':function(){
+		var testArray = [99];
+		every(testArray, function(currentElement, currentIndex){
+			eq(currentIndex, 0);
+		})
+	},
+	'3. Third argument passsed into Callback should be the array it searches.':function(){
+		var testArray = [99, 3, -2, 404];
+		every(testArray, function(currentElement, currentIndex, array){
+			for (var i = 0; i < array.length; i++) {
+				eq(testArray[i], array[i]);
+			}
+		})
+	},
+	'4. It should accept an optional THIS object': function(){
+		var testArray = [1, 2, 3];
+		var thisObject = {
+			name: 'fox'
+		};
+		every(testArray, function(currentValue){
+			eq(this.name, 'fox');
+		}, thisObject);
+	},
+	'5. It should return false if a single element in the array returns false in the callback.':function(){
+		var testArray = [99, 3, -2, 404];
+		var everyResult = every(testArray, function(currentElement, currentIndex, array){
+			return currentElement > 0;
+		})
+		eq(everyResult, false);
+	},
+	'6. It should return true if every element in the array returns true in callback. ':function(){
+		var testArray = [99, 3, 44, 404];
+		var everyResult = every(testArray, function(currentElement, currentIndex, array){
+			return currentElement > 0;
+		})
+		eq(everyResult, true);
+	},
+	'7. It should return true for an empty array.':function(){
+		var testArray = [];
+		var everyResult = every(testArray, function(currentValue){
+			return currentValue === 100;
+		})
+		eq(everyResult, true);
+	}, 
+	'8. Callback should stop running as soon as a single element returns false.':function(){
+		var testArray = [50, 40, 30, 20, 70, 90, 100];
+		var timesCallbackRuns = 0;
+		every(testArray, function(currentElement){
+			timesCallbackRuns++;
+			return currentElement > 25;
+		})
+		eq(timesCallbackRuns, 4);
+
+	},
+
+	'9. Callback should NOT visit holes in the array.':function(){
+		var testArray = [50,,,,30,,,,100,,,70,,,90,,,100];
+		var timesCallbackRuns = 0;
+		every(testArray, function(currentElement){
+			timesCallbackRuns++;
+			return currentElement > 25;
+		})
+		eq(timesCallbackRuns, Object.keys(testArray).length);
+	},
+	'10. Callback should NOT visit elements appended to array during callback. ':function(){
+		var testArray = [5, 15, 66];
+		var timesCallbackRuns = 0;
+		every(testArray, function(currentElement, currentIndex, array){
+			timesCallbackRuns++;
+			array.push(44);
+		})
+		eq(timesCallbackRuns, 3);
+	},
+	'11. Callback should NOT visit elements that were deleted during callback.':function(){
+	    var testArray = [1, 2, 3, 4];
+	    var numberOfTimesCallbackHasRun = 0;
+	    var result = every(testArray, function(currentValue, currentIndex, array) {
+	      numberOfTimesCallbackHasRun++;
+	      if (currentIndex === 0) {
+	        delete array[2];
+	      }
+	      return currentValue !== 3;
+	    });
+	    eq(numberOfTimesCallbackHasRun, 3);
+	    eq(result, true);
+		},
+
+	'12. If element of array is changed during callback, callback should visit the new value.':function(){
+		var testArray = [7, 15, 9];
+		var everyResult = every(testArray, function(currentElement, currentIndex, array){
+			array[1] = 3;
+			return currentElement < 10;
+		})
+		eq(everyResult, true);
+	}, 
+	'13. The array provided to every() should not be mutated before being passed into the callback function.':function(){
+		var testArray = [5, 90, 150, 200];
+		find(testArray, function(currentElement, currentIndex, array){
+			eq(array, testArray);
+		})
+	}
+
+});
+
+
+</script>

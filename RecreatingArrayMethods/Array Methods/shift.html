@@ -1,0 +1,89 @@
+<script src="../simpletest.js"></script>
+
+<script>
+
+/*
+Function Description:
+	shift() removes the first element from a given array and decreases the length by 1. It returns the removed element. 
+
+Prototype Implementation:
+	shift(array) {
+			var shiftedElement = array[0];
+			for (var i = 0; i < array.length - 1; i++) {
+				array[i] = array[i + 1];
+			}
+			return shiftedElement;
+	}
+
+Function Signature: 
+	shift(array)
+
+Requirements:
+
+Function Behavior:
+	1. It should remove the element at index 0 of given array. 
+	2. It should shift the index of every value down by 1.
+	3. It should decrease the length of given array by 1.  
+
+Return value:
+	4. It should return the removed element from the array.
+	5. It should return undefined if the array is empty. 
+
+*/
+
+function shift(array){
+	
+	// Check if array is empty.
+	if (array.length < 1) {
+		return undefined;
+	}
+
+	// Store first element of array in a variable to return. 
+	var removedElement = array[0]; 
+	
+	// Adjust index of every element in array.
+	for (var i = 0; i < array.length - 1; i++) {
+		array[i] = array[i + 1];
+	}
+	
+	// Decrease length by 1. Array will forget final index exists.
+	array.length--;	
+
+	// Return the removed element. 
+	return removedElement;
+} 
+
+tests({
+	'1. It should remove the element at index 0 of given array.': function(){
+		var array = [5, 15, 25];
+		shift(array);
+		eq(array[0] === 5, false);
+	},
+	'2. It should shift the index of every value down by 1.': function(){
+		var array = [0, 1, 2, 3, 4, 5];
+		shift(array);
+		eq(array[0], 1);
+		eq(array[1], 2);
+		eq(array[2], 3);
+		eq(array[3], 4);
+		eq(array[4], 5);
+	},
+	'3. It should decrease the length of given array by 1. ': function(){
+		var array = [0, 1, 2, 3, 4, 5];
+		shift(array);
+		eq(array.length, 5);
+	},
+	'4. It should return the removed element from the array.': function(){
+		var array = [77, 3, 9, 6];
+		var result = shift(array);
+		eq(result, 77);
+	},
+	'5. It should return undefined if the array is empty.': function(){
+		var emptyArray = [];
+		var result = shift(emptyArray);
+		eq(result, undefined);
+	}
+});
+
+
+</script>
